@@ -1,0 +1,6 @@
+{
+  "name": "RentPulse",
+  "description": "Event rental management platform for tracking bookings, customer communications, and automated equipment maintenance scheduling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

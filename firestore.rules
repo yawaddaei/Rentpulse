@@ -1,0 +1,215 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidCustomer(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() <= 40 &&
+             (!('email' in data) || data.email == null || (data.email is string && data.email.size() <= 120)) &&
+             (!('address' in data) || data.address == null || (data.address is string && data.address.size() <= 200)) &&
+             (!('company' in data) || data.company == null || (data.company is string && data.company.size() <= 120)) &&
+             (!('notes' in data) || data.notes == null || (data.notes is string && data.notes.size() <= 1000)) &&
+             (!('totalBookings' in data) || (data.totalBookings is int && data.totalBookings >= 0)) &&
+             (!('totalSpent' in data) || (data.totalSpent is number && data.totalSpent >= 0)) &&
+             (!('updatedAt' in data) || data.updatedAt == null || data.updatedAt is timestamp);
+    }
+
+    function isValidEquipment(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.category is string && data.category.size() > 0 && data.category.size() <= 50 &&
+             (!('assetTag' in data) || data.assetTag == null || (data.assetTag is string && data.assetTag.size() <= 60)) &&
+             (!('status' in data) || (data.status is string && data.status.size() <= 30)) &&
+             (!('warehouseLocation' in data) || data.warehouseLocation == null || (data.warehouseLocation is string && data.warehouseLocation.size() <= 100)) &&
+             data.totalQuantity is int && data.totalQuantity >= 0 &&
+             (!('availableQuantity' in data) || (data.availableQuantity is int && data.availableQuantity >= 0)) &&
+             (data.rentalPricePerDay is number && data.rentalPricePerDay >= 0) &&
+             data.condition is string && data.condition.size() <= 30 &&
+             (!('totalEventsUsed' in data) || (data.totalEventsUsed is int && data.totalEventsUsed >= 0)) &&
+             (!('maintenanceIntervalEvents' in data) || (data.maintenanceIntervalEvents is int && data.maintenanceIntervalEvents >= 0)) &&
+             (!('lastServicedAt' in data) || data.lastServicedAt == null || data.lastServicedAt is timestamp) &&
+             (!('nextServiceDueDate' in data) || data.nextServiceDueDate == null || data.nextServiceDueDate is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt == null || data.updatedAt is timestamp);
+    }
+
+    function isValidBooking(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             (!('customerId' in data) || data.customerId == null || (data.customerId is string && data.customerId.size() <= 128)) &&
+             data.clientName is string && data.clientName.size() > 0 && data.clientName.size() <= 100 &&
+             (!('clientEmail' in data) || data.clientEmail == null || (data.clientEmail is string && data.clientEmail.size() <= 120)) &&
+             (!('clientPhone' in data) || data.clientPhone == null || (data.clientPhone is string && data.clientPhone.size() <= 40)) &&
+             data.eventTitle is string && data.eventTitle.size() > 0 && data.eventTitle.size() <= 100 &&
+             (!('eventType' in data) || data.eventType == null || (data.eventType is string && data.eventType.size() <= 50)) &&
+             (!('itemType' in data) || data.itemType == null || (data.itemType is string && data.itemType.size() <= 50)) &&
+             (!('deliveryAddress' in data) || data.deliveryAddress == null || (data.deliveryAddress is string && data.deliveryAddress.size() <= 200)) &&
+             data.status is string && data.status.size() <= 30 &&
+             (!('itemSummary' in data) || data.itemSummary == null || (data.itemSummary is string && data.itemSummary.size() <= 500)) &&
+             (data.totalAmount is number && data.totalAmount >= 0) &&
+             (!('depositPaid' in data) || (data.depositPaid is number && data.depositPaid >= 0)) &&
+             (!('notes' in data) || data.notes == null || (data.notes is string && data.notes.size() <= 1000)) &&
+             (!('startDate' in data) || data.startDate == null || data.startDate is timestamp) &&
+             (!('endDate' in data) || data.endDate == null || data.endDate is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt == null || data.updatedAt is timestamp);
+    }
+
+    function isValidCommunication(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             (!('customerId' in data) || data.customerId == null || (data.customerId is string && data.customerId.size() <= 128)) &&
+             (!('bookingId' in data) || data.bookingId == null || (data.bookingId is string && data.bookingId.size() <= 128)) &&
+             data.clientName is string && data.clientName.size() > 0 && data.clientName.size() <= 100 &&
+             (!('clientContact' in data) || data.clientContact == null || (data.clientContact is string && data.clientContact.size() <= 120)) &&
+             data.channel is string && data.channel.size() <= 30 &&
+             (!('direction' in data) || (data.direction is string && data.direction.size() <= 30)) &&
+             (!('templateType' in data) || data.templateType == null || (data.templateType is string && data.templateType.size() <= 50)) &&
+             (!('subject' in data) || data.subject == null || (data.subject is string && data.subject.size() <= 150)) &&
+             data.messageBody is string && data.messageBody.size() > 0 && data.messageBody.size() <= 2000 &&
+             data.status is string && data.status.size() <= 30 &&
+             (!('updatedAt' in data) || data.updatedAt == null || data.updatedAt is timestamp);
+    }
+
+    function isValidMaintenance(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.equipmentId is string && data.equipmentId.size() <= 128 &&
+             data.equipmentName is string && data.equipmentName.size() > 0 && data.equipmentName.size() <= 100 &&
+             (!('category' in data) || data.category == null || (data.category is string && data.category.size() <= 50)) &&
+             data.triggerReason is string && data.triggerReason.size() <= 50 &&
+             data.priority is string && data.priority.size() <= 30 &&
+             data.status is string && data.status.size() <= 30 &&
+             (!('technicianNotes' in data) || data.technicianNotes == null || (data.technicianNotes is string && data.technicianNotes.size() <= 1000)) &&
+             (!('estimatedCost' in data) || (data.estimatedCost is number && data.estimatedCost >= 0)) &&
+             (!('dueDate' in data) || data.dueDate == null || data.dueDate is timestamp) &&
+             (!('completedAt' in data) || data.completedAt == null || data.completedAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt == null || data.updatedAt is timestamp);
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+
+      // Subcollection: Customer Profiles
+      match /customers/{customerId} {
+        allow get, list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(customerId) &&
+                         incoming().userId == request.auth.uid &&
+                         incoming().createdAt is timestamp &&
+                         incoming().createdAt <= request.time &&
+                         isValidCustomer(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(customerId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidCustomer(incoming());
+
+        allow delete: if isOwner(userId) && isValidId(customerId);
+      }
+
+      // Subcollection: Equipment Inventory
+      match /inventory/{itemId} {
+        allow get, list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(itemId) &&
+                         incoming().userId == request.auth.uid &&
+                         incoming().createdAt is timestamp &&
+                         incoming().createdAt <= request.time &&
+                         isValidEquipment(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(itemId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidEquipment(incoming());
+
+        allow delete: if isOwner(userId) && isValidId(itemId);
+      }
+
+      // Subcollection: Bookings
+      match /bookings/{bookingId} {
+        allow get, list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(bookingId) &&
+                         incoming().userId == request.auth.uid &&
+                         incoming().createdAt is timestamp &&
+                         incoming().createdAt <= request.time &&
+                         isValidBooking(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(bookingId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidBooking(incoming());
+
+        allow delete: if isOwner(userId) && isValidId(bookingId);
+      }
+
+      // Subcollection: Communications
+      match /communications/{commId} {
+        allow get, list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(commId) &&
+                         incoming().userId == request.auth.uid &&
+                         incoming().createdAt is timestamp &&
+                         incoming().createdAt <= request.time &&
+                         isValidCommunication(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(commId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidCommunication(incoming());
+
+        allow delete: if isOwner(userId) && isValidId(commId);
+      }
+
+      // Subcollection: Maintenance Tasks
+      match /maintenance/{taskId} {
+        allow get, list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(taskId) &&
+                         incoming().userId == request.auth.uid &&
+                         incoming().createdAt is timestamp &&
+                         incoming().createdAt <= request.time &&
+                         isValidMaintenance(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(taskId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidMaintenance(incoming());
+
+        allow delete: if isOwner(userId) && isValidId(taskId);
+      }
+    }
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "entities": {
+    "CustomerProfile": {
+      "title": "Customer Profile",
+      "description": "Client profile containing contact details, company affiliation, and preferences.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document ID" },
+        "userId": { "type": "string", "description": "Owner user UID" },
+        "name": { "type": "string", "description": "Customer full name" },
+        "phone": { "type": "string", "description": "Customer phone number" },
+        "email": { "type": "string", "description": "Customer email address" },
+        "address": { "type": "string", "description": "Billing / physical address" },
+        "company": { "type": "string", "description": "Company affiliation or organization name if applicable" },
+        "notes": { "type": "string", "description": "Special preferences or requirements" },
+        "totalBookings": { "type": "integer", "description": "Total completed rental bookings" },
+        "totalSpent": { "type": "number", "description": "Lifetime revenue from customer" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" }
+      },
+      "required": ["userId", "name", "phone", "createdAt"]
+    },
+    "EquipmentItem": {
+      "title": "Equipment Item",
+      "description": "Rental equipment asset tracked for bookings, warehouse location, and maintenance.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document ID" },
+        "userId": { "type": "string", "description": "Owner user UID" },
+        "assetTag": { "type": "string", "description": "Unique serial or asset tracking barcode ID" },
+        "name": { "type": "string", "description": "Name of the equipment" },
+        "category": { "type": "string", "description": "Category: Tents, AV, Power, Furniture, Decor, etc." },
+        "status": { "type": "string", "description": "AVAILABLE, RENTED, MAINTENANCE, RETIRED" },
+        "warehouseLocation": { "type": "string", "description": "Location within warehouse e.g. Aisle 2 - Shelf C" },
+        "totalQuantity": { "type": "integer", "description": "Total fleet quantity" },
+        "availableQuantity": { "type": "integer", "description": "Currently available quantity" },
+        "rentalPricePerDay": { "type": "number", "description": "Daily rental rate in dollars" },
+        "condition": { "type": "string", "description": "EXCELLENT, GOOD, NEEDS_SERVICE, UNDER_MAINTENANCE" },
+        "totalEventsUsed": { "type": "integer", "description": "Count of completed bookings" },
+        "maintenanceIntervalEvents": { "type": "integer", "description": "Threshold before service required" },
+        "lastServicedAt": { "type": "string", "format": "date-time", "description": "Last service timestamp" },
+        "nextServiceDueDate": { "type": "string", "format": "date-time", "description": "Due date timestamp for service" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": ["userId", "name", "category", "totalQuantity", "rentalPricePerDay", "condition", "createdAt"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Event rental booking and customer reservation record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document ID" },
+        "userId": { "type": "string", "description": "Owner user UID" },
+        "customerId": { "type": "string", "description": "Linked customer profile ID if assigned" },
+        "clientName": { "type": "string", "description": "Customer full name" },
+        "clientEmail": { "type": "string", "description": "Customer email" },
+        "clientPhone": { "type": "string", "description": "Customer phone number" },
+        "eventTitle": { "type": "string", "description": "Name or title of the event" },
+        "eventType": { "type": "string", "description": "Wedding, Corporate, Party, Festival, Other" },
+        "itemType": { "type": "string", "description": "Primary item category e.g. Tents & Canopies, Lighting & AV, etc." },
+        "deliveryAddress": { "type": "string", "description": "Event delivery location" },
+        "status": { "type": "string", "description": "CONFIRMED, TENTATIVE, PENDING, ACTIVE, COMPLETED, CANCELLED" },
+        "itemSummary": { "type": "string", "description": "Summary description of rented items" },
+        "totalAmount": { "type": "number", "description": "Total charge amount" },
+        "depositPaid": { "type": "number", "description": "Deposit collected" },
+        "notes": { "type": "string", "description": "Special client requests or instructions" },
+        "startDate": { "type": "string", "format": "date-time", "description": "Event start timestamp" },
+        "endDate": { "type": "string", "format": "date-time", "description": "Event end timestamp" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" }
+      },
+      "required": ["userId", "clientName", "eventTitle", "status", "totalAmount", "createdAt"]
+    },
+    "Communication": {
+      "title": "Customer Communication",
+      "description": "Log of messages, notifications, and notes sent to or received from customers.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document ID" },
+        "userId": { "type": "string", "description": "Owner user UID" },
+        "customerId": { "type": "string", "description": "Linked customer profile ID" },
+        "bookingId": { "type": "string", "description": "Associated booking document ID if any" },
+        "clientName": { "type": "string", "description": "Customer name" },
+        "clientContact": { "type": "string", "description": "Phone or email address" },
+        "channel": { "type": "string", "description": "SMS, EMAIL, CALL, NOTE" },
+        "direction": { "type": "string", "description": "OUTBOUND, INBOUND" },
+        "templateType": { "type": "string", "description": "BOOKING_CONFIRMATION, DELIVERY_REMINDER, RETURN_CHECKLIST, MAINTENANCE_UPDATE, CUSTOM" },
+        "subject": { "type": "string", "description": "Subject or title of message" },
+        "messageBody": { "type": "string", "description": "Full text content of communication" },
+        "status": { "type": "string", "description": "SENT, DELIVERED, RECEIVED, DRAFT" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" }
+      },
+      "required": ["userId", "clientName", "channel", "messageBody", "status", "createdAt"]
+    },
+    "MaintenanceTask": {
+      "title": "Maintenance Task",
+      "description": "Equipment maintenance, inspection, and service ticket.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document ID" },
+        "userId": { "type": "string", "description": "Owner user UID" },
+        "equipmentId": { "type": "string", "description": "Associated equipment item document ID" },
+        "equipmentName": { "type": "string", "description": "Name of the equipment unit" },
+        "category": { "type": "string", "description": "Category / item type of equipment" },
+        "triggerReason": { "type": "string", "description": "AUTOMATED_EVENT_THRESHOLD, PERIODIC_INSPECTION, DAMAGE_REPORTED, POST_RENTAL_CLEANING, MANUAL_SCHEDULE" },
+        "priority": { "type": "string", "description": "LOW, MEDIUM, HIGH, CRITICAL" },
+        "status": { "type": "string", "description": "SCHEDULED, IN_PROGRESS, COMPLETED, SKIPPED" },
+        "technicianNotes": { "type": "string", "description": "Work performed or checklist findings" },
+        "estimatedCost": { "type": "number", "description": "Estimated repair cost" },
+        "dueDate": { "type": "string", "format": "date-time", "description": "Target completion date" },
+        "completedAt": { "type": "string", "format": "date-time", "description": "Completion timestamp" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" }
+      },
+      "required": ["userId", "equipmentId", "equipmentName", "triggerReason", "priority", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/customers/{customerId}": {
+      "schema": { "$ref": "#/entities/CustomerProfile" },
+      "description": "Customer profiles including contact information, company affiliation, and preferences."
+    },
+    "/users/{userId}/inventory/{itemId}": {
+      "schema": { "$ref": "#/entities/EquipmentItem" },
+      "description": "Individual equipment items with warehouse location, asset tag, and availability status."
+    },
+    "/users/{userId}/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Event rental bookings (confirmed, tentative, active) for calendar and logistics."
+    },
+    "/users/{userId}/communications/{commId}": {
+      "schema": { "$ref": "#/entities/Communication" },
+      "description": "Customer communications log and automated templates."
+    },
+    "/users/{userId}/maintenance/{taskId}": {
+      "schema": { "$ref": "#/entities/MaintenanceTask" },
+      "description": "Scheduled and automated maintenance tickets for equipment assets."
+    }
+  }
+}
