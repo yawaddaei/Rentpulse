@@ -11,16 +11,28 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v3
-      - name: Find gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: List files
         run: |
-          find . -name "gradlew" -type f
           ls -la
+          find . -type f -name "*.gradle*" | head -20
+          ls -la android/ || echo "no android folder"
       - name: Build APK
         run: |
-          chmod +x $(find . -name gradlew | head -1)
-          $(find . -name gradlew | head -1) assembleDebug
-      - uses: actions/upload-artifact@v4
+          if [ -f "./android/gradlew" ]; then
+            chmod +x ./android/gradlew
+            ./android/gradlew -p android assembleDebug
+          elif [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug
+          else
+            gradle -p android assembleDebug || gradle assembleDebug
+          fi
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: Rentpulse-APK
-          path: "**/app-debug.apk"
+          path: |
+            **/app-debug.apk
+            **/app/build/outputs/**/*.apk
