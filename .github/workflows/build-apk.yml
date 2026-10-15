@@ -11,19 +11,29 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-      - name: Fix missing gradlew
+      - name: Fix project structure
         run: |
           ls -la
-          ls -la gradle/wrapper/ || echo "no wrapper dir"
-          # If gradlew missing, create it
+          # Move wrapper props if misplaced
+          if [ -f "./gradle-wrapper.properties" ]; then
+            mkdir -p gradle/wrapper
+            mv ./gradle-wrapper.properties gradle/wrapper/ || cp ./gradle-wrapper.properties gradle/wrapper/
+          fi
+          # Create .env dummy so build doesn't fail
+          echo "GEMINI_API_KEY=placeholder" > .env
+          # Remove the bad signingConfig line per README step 5
+          if [ -f "./app/build.gradle.kts" ]; then
+            sed -i '/signingConfig = signingConfigs.getByName("debugConfig")/d' ./app/build.gradle.kts
+            cat ./app/build.gradle.kts | grep -A2 -B2 signingConfig || echo "line removed"
+          fi
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Generate gradlew if missing
+        run: |
           if [ ! -f "./gradlew" ]; then
-            echo "gradlew missing - generating..."
             gradle wrapper --gradle-version 8.5
           fi
           chmod +x gradlew
-          ./gradlew --version
       - name: Build APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Upload APK
