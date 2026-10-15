@@ -13,26 +13,21 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: List files
+      - name: Fix missing gradlew
         run: |
           ls -la
-          find . -type f -name "*.gradle*" | head -20
-          ls -la android/ || echo "no android folder"
-      - name: Build APK
-        run: |
-          if [ -f "./android/gradlew" ]; then
-            chmod +x ./android/gradlew
-            ./android/gradlew -p android assembleDebug
-          elif [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug
-          else
-            gradle -p android assembleDebug || gradle assembleDebug
+          ls -la gradle/wrapper/ || echo "no wrapper dir"
+          # If gradlew missing, create it
+          if [ ! -f "./gradlew" ]; then
+            echo "gradlew missing - generating..."
+            gradle wrapper --gradle-version 8.5
           fi
+          chmod +x gradlew
+          ./gradlew --version
+      - name: Build APK
+        run: ./gradlew assembleDebug --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Rentpulse-APK
-          path: |
-            **/app-debug.apk
-            **/app/build/outputs/**/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
